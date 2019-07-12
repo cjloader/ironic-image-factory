@@ -9,6 +9,7 @@ from novaclient import client as nova_client
 import glanceclient
 import wget
 import tempfile
+import requests
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -43,23 +44,18 @@ def upload_new_images():
     url = ('http://84101b01061cb1b0b6e9-f697b3e19d8f61d62243203199cd335f'
            '.r43.cf5.rackcdn.com/Alpine/3.9/'
            '2019-07-08/alpine-3.9-2019-07-08.qcow2')
-    image = wget.download(url)
-
+    
     glance = CLIENTS['glance']
 
-    with tempfile.NamedTemporaryFile() as temp:
-        temp.write(checksum)
-        if should_call_some_python_function_that_will_read_the_file():
-            temp.seek(0)
-            some_python_function(temp)
-        elif should_call_external_command():
-            temp.flush()
-            subprocess.call(["wc", temp.name])
+    images = glance.images.list()
 
-   glance_uploaded_images = glance.images.list()
-   for image in :
-         if image.checksum =   
-           glance_image = glance.images.create(name="alpine-3.9-2019-07-08", is_public="True", disk_format="qcow2",
+    with tempfile.TemporaryDirectory() as tempdir:
+         image_download = wget.download(url, tempdir)
+         print(image_download)
+
+    if head.headers[‘ETag’] not in[image.checksum for image in images]:
+        
+        glance_image = glance.images.create(name="alpine-3.9-2019-07-08", is_public="True", disk_format="qcow2",
                         container_format="bare", tags=["RackspaceManaged"])
     print('')
     print("Uploading images to Glance")
