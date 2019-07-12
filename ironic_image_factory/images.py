@@ -7,7 +7,7 @@ from keystoneclient.v3 import client as keystone_client
 from ironicclient import client as ironic_client
 from novaclient import client as nova_client
 import glanceclient
-import wget 
+import wget
 import tempfile
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -36,15 +36,16 @@ def load_auth_clients():
     nv_client = nova_client.Client(2, session=ks_sess)
     CLIENTS['nova'] = nv_client
 
+
 def upload_new_images():
     print("Downloading new images...")
-    
-    url = 'http://84101b01061cb1b0b6e9-f697b3e19d8f61d62243203199cd335f.r43.cf5.rackcdn.com/Alpine/3.9/2019-07-08/alpine-3.9-2019-07-08.qcow2'
+
+    url = ('http://84101b01061cb1b0b6e9-f697b3e19d8f61d62243203199cd335f'
+           '.r43.cf5.rackcdn.com/Alpine/3.9/'
+           '2019-07-08/alpine-3.9-2019-07-08.qcow2')
     image = wget.download(url)
-    
+
     glance = CLIENTS['glance']
-    
-   
 
     with tempfile.NamedTemporaryFile() as temp:
         temp.write(checksum)
@@ -54,7 +55,7 @@ def upload_new_images():
         elif should_call_external_command():
             temp.flush()
             subprocess.call(["wc", temp.name])
-   
+
    glance_uploaded_images = glance.images.list()
    for image in :
          if image.checksum =   
