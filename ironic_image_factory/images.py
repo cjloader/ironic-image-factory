@@ -1,4 +1,3 @@
-
 import os
 import sys
 import urllib3
@@ -8,13 +7,12 @@ from keystoneclient.v3 import client as keystone_client
 from ironicclient import client as ironic_client
 from novaclient import client as nova_client
 import glanceclient
-import argparse
+import wget 
+import tempfile
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CLIENTS = {}
-
-def load_args():
-    return parser.parse_args()
 
 
 def load_auth_clients():
@@ -40,27 +38,40 @@ def load_auth_clients():
 
 def upload_new_images():
     print("Downloading new images...")
-    urllib.request.urlretrieve("https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com","test-image.qcow2")
-
+    
+    url = 'http://84101b01061cb1b0b6e9-f697b3e19d8f61d62243203199cd335f.r43.cf5.rackcdn.com/Alpine/3.9/2019-07-08/alpine-3.9-2019-07-08.qcow2'
+    image = wget.download(url)
+    
     glance = CLIENTS['glance']
-    glance.images.create(name="ubuntu-test", is_public=True, disk_format="qcow2",
-                        container_format=“bare”, data="test-image.qcow2")
+    
+   
 
-def delete_old_images():
-    nova = CLIENTS['nova']
-    glance = CLIENTS['glance']
-    instances = nova.servers.list()
-    images = glance.images.list()
-    for image in images:
-        for instance in instances:
-            if images[image] != instance['image']:
-                glance.images.delete(image)
+    with tempfile.NamedTemporaryFile() as temp:
+        temp.write(checksum)
+        if should_call_some_python_function_that_will_read_the_file():
+            temp.seek(0)
+            some_python_function(temp)
+        elif should_call_external_command():
+            temp.flush()
+            subprocess.call(["wc", temp.name])
+   
+   glance_uploaded_images = glance.images.list()
+   for image in :
+         if image.checksum =   
+           glance_image = glance.images.create(name="alpine-3.9-2019-07-08", is_public="True", disk_format="qcow2",
+                        container_format="bare", tags=["RackspaceManaged"])
+    print('')
+    print("Uploading images to Glance")
+    
+    glance.images.upload(glance_image.id, open('alpine-3.9-2019-07-08.qcow2', 'rb'))
 
+    
 def main():
-    args = load_args()
     load_auth_clients()
-
-    delete_old_images()
     upload_new_images()
 
     print("Image Updates are Complete")
+
+
+if __name__ == "__main__":
+    main()

@@ -26,7 +26,7 @@ setup(
         packages=find_packages(exclude=['contrib', 'docs', 'tests']),
         python_requires='>=3.5',
         install_requires=[
-            'pandas',
+            'wget',
             'xlrd',
             'gevent==1.4.0',
             'python-ironicclient',
