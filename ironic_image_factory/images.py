@@ -39,34 +39,36 @@ def load_auth_clients():
 
 
 def upload_new_images():
-    print("Downloading new images...")
-
-    url = ('http://84101b01061cb1b0b6e9-f697b3e19d8f61d62243203199cd335f'
-           '.r43.cf5.rackcdn.com/Alpine/3.9/'
-           '2019-07-08/alpine-3.9-2019-07-08.qcow2')
+    image_urls = {"Alpine Linux-3.9": "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Alpine/3.9/2019-07-08/alpine-3.9-2019-07-08.qcow2",
+                 "CentOS-6": "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/CentOS/6/2019-07-08/centos-6-2019-07-08.qcow2",
+                 "CentOS-7": "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/CentOS/7/2019-07-08/centos-7-2019-07-08.qcow2",
+                 "Debian-Jessie64"  : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Debian/jessie64/2019-07-08/debian-jessie64-2019-07-08.qcow2",
+                 "Debian-Stretch64" : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Debian/stretch64/2019-07-08/debian-stretch64-2019-07-08.qcow2",
+                 "Ubuntu-Trusty64" : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Ubuntu/trusty64/2019-07-08/ubuntu-trusty64-2019-07-08.qcow2",
+                 "Ubuntu-Xenial64" : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Ubuntu/xenial64/2019-07-08/ubuntu-xenial64-2019-07-08.qcow2",
+                 "Ubuntu-Bionic64" : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Ubuntu/bionic64/2019-07-08/ubuntu-bionic64-2019-07-08.qcow2",
+                 "Ubuntu-Cosmic64" : "https://c8dbf21d7d7507d989c7-f697b3e19d8f61d62243203199cd335f.ssl.cf5.rackcdn.com/Ubuntu/cosmic64/2019-07-08/ubuntu-cosmic64-2019-07-08.qcow2"}
     
     glance = CLIENTS['glance']
 
     images = glance.images.list()
-
-    with tempfile.TemporaryDirectory() as tempdir:
-         image_download = wget.download(url, tempdir)
-         print(image_download)
-
-    if head.headers[‘ETag’] not in[image.checksum for image in images]:
-        
-        glance_image = glance.images.create(name="alpine-3.9-2019-07-08", is_public="True", disk_format="qcow2",
-                        container_format="bare", tags=["RackspaceManaged"])
-    print('')
-    print("Uploading images to Glance")
-    
-    glance.images.upload(glance_image.id, open('alpine-3.9-2019-07-08.qcow2', 'rb'))
-
+    image_checksums = [image.checksum for image in images]
+    print(image_checksums)
+    for name,url in image_urls.items():
+        with tempfile.TemporaryDirectory() as tempdir:
+            etag  = requests.head(url).headers['ETag']
+            if etag not in image_checksums:
+               image_download = wget.download(url, tempdir)
+               glance_image = glance.images.create(name=name, is_public="True", disk_format="qcow2",
+                       container_format="bare", tags=["RackspaceManaged"])
+               print('')
+               print("Uploading "+name+" to Glance")
+               glance.images.upload(glance_image.id, open(image_download, 'rb'))
     
 def main():
     load_auth_clients()
     upload_new_images()
-
+    print('')
     print("Image Updates are Complete")
 
 
